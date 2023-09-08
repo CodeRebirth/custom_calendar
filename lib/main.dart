@@ -1,3 +1,4 @@
+import 'package:custom_calender/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -10,9 +11,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: CalendarApp(),
+      home: CalendarApp(
+        showHeader: true,
+        enablePredicate: (date) {
+          if (date.isBefore(DateTime.now())) {
+            if (checkSameDay(date, DateTime.now())) {
+              return true;
+            }
+            return false;
+          }
+          return true;
+        },
+      ),
     );
   }
 }
@@ -20,12 +32,18 @@ class MyApp extends StatelessWidget {
 class CalendarApp extends StatefulWidget {
   final BoxDecoration? selectedDecoration;
   final BoxDecoration? todayDecoration;
+  final bool Function(DateTime)? enablePredicate;
+  final bool showHeader;
 
-  const CalendarApp({
+  // Use an instance variable to set enablePredicate
+  CalendarApp({
     Key? key,
-    this.todayDecoration,
     this.selectedDecoration,
-  }) : super(key: key);
+    this.todayDecoration,
+    bool Function(DateTime)? enablePredicate,
+    this.showHeader = true,
+  })  : enablePredicate = enablePredicate ?? ((date) => true), // Set a default value if not provided
+        super(key: key);
 
   @override
   State<CalendarApp> createState() => _CalendarAppState();
@@ -40,7 +58,6 @@ class _CalendarAppState extends State<CalendarApp> {
     if (a == null || b == null) {
       return false;
     }
-
     return a.year == b.year && a.month == b.month && a.day == b.day && a.month == currentDate.month;
   }
 
@@ -80,28 +97,29 @@ class _CalendarAppState extends State<CalendarApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Custom Calendar'),
+        title: const Text('Simple Fast Calender'),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: const Icon(Icons.chevron_left),
-                onPressed: prevMonth,
-              ),
-              Text(
-                DateFormat.yMMM().format(currentDate),
-                style: const TextStyle(fontSize: 20),
-              ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: nextMonth,
-              ),
-            ],
-          ),
+          if (widget.showHeader)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.chevron_left),
+                  onPressed: prevMonth,
+                ),
+                Text(
+                  DateFormat.yMMM().format(currentDate),
+                  style: const TextStyle(fontSize: 20),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.chevron_right),
+                  onPressed: nextMonth,
+                ),
+              ],
+            ),
           GridView.builder(
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 2),
@@ -139,59 +157,31 @@ class _CalendarAppState extends State<CalendarApp> {
     final isSelected = isSameDay(selectedDate, dateTime);
     final isWithinCurrentMonth = dateTime.month == currentDate.month;
 
-    return isToday
-        ? GestureDetector(
-            onTap: () => onSelectedDate(dateTime),
-            child: Center(
-              child: Container(
-                height: 30,
-                width: 30,
-                decoration: isSelected
-                    ? widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue)
-                    : widget.todayDecoration ?? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.blue)),
-                alignment: Alignment.center,
-                child: Text(
-                  isWithinCurrentMonth ? day.toString() : ' ',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+    return GestureDetector(
+      onTap: () {
+        if (widget.enablePredicate!(dateTime) == false) {
+          return;
+        }
+        onSelectedDate(dateTime);
+      },
+      child: Center(
+        child: Container(
+          height: 30,
+          width: 30,
+          decoration: isSelected
+              ? widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue)
+              : isToday
+                  ? widget.todayDecoration ?? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.blue))
+                  : const BoxDecoration(), // No decoration for unselectable dates
+          alignment: Alignment.center,
+          child: Text(
+            isWithinCurrentMonth ? day.toString() : ' ',
+            style: TextStyle(
+              fontWeight: widget.enablePredicate!(dateTime) == false ? FontWeight.normal : FontWeight.bold,
             ),
-          )
-        : isSelected
-            ? GestureDetector(
-                onTap: () => onSelectedDate(dateTime),
-                child: Center(
-                  child: Container(
-                    height: 30,
-                    width: 30,
-                    decoration: widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
-                    alignment: Alignment.center,
-                    child: Text(
-                      isWithinCurrentMonth ? day.toString() : ' ',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            : GestureDetector(
-                onTap: () => onSelectedDate(dateTime),
-                child: Center(
-                  child: Container(
-                    height: 30,
-                    width: 30,
-                    alignment: Alignment.center,
-                    child: Text(
-                      isWithinCurrentMonth ? day.toString() : ' ',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              );
+          ),
+        ),
+      ),
+    );
   }
 }
