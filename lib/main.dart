@@ -18,7 +18,14 @@ class MyApp extends StatelessWidget {
 }
 
 class CalendarApp extends StatefulWidget {
-  const CalendarApp({super.key});
+  final BoxDecoration? selectedDecoration;
+  final BoxDecoration? todayDecoration;
+
+  const CalendarApp({
+    Key? key,
+    this.todayDecoration,
+    this.selectedDecoration,
+  }) : super(key: key);
 
   @override
   State<CalendarApp> createState() => _CalendarAppState();
@@ -118,7 +125,6 @@ class _CalendarAppState extends State<CalendarApp> {
             itemBuilder: (context, index) {
               final day = index + 1 - currentDate.weekday;
               final dateTime = DateTime(currentDate.year, currentDate.month, day);
-
               return buildDayContainer(dateTime);
             },
           )
@@ -133,28 +139,59 @@ class _CalendarAppState extends State<CalendarApp> {
     final isSelected = isSameDay(selectedDate, dateTime);
     final isWithinCurrentMonth = dateTime.month == currentDate.month;
 
-    final decoration = BoxDecoration(
-      shape: BoxShape.circle,
-      border: isToday ? Border.all(color: Colors.blue) : null,
-      color: isSelected ? Colors.blue : null,
-    );
-
-    return GestureDetector(
-      onTap: () => onSelectedDate(dateTime),
-      child: Center(
-        child: Container(
-          height: 30,
-          width: 30,
-          alignment: Alignment.center,
-          decoration: decoration,
-          child: Text(
-            isWithinCurrentMonth ? day.toString() : ' ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
+    return isToday
+        ? GestureDetector(
+            onTap: () => onSelectedDate(dateTime),
+            child: Center(
+              child: Container(
+                height: 30,
+                width: 30,
+                decoration: isSelected
+                    ? widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue)
+                    : widget.todayDecoration ?? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.blue)),
+                alignment: Alignment.center,
+                child: Text(
+                  isWithinCurrentMonth ? day.toString() : ' ',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
+          )
+        : isSelected
+            ? GestureDetector(
+                onTap: () => onSelectedDate(dateTime),
+                child: Center(
+                  child: Container(
+                    height: 30,
+                    width: 30,
+                    decoration: widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue),
+                    alignment: Alignment.center,
+                    child: Text(
+                      isWithinCurrentMonth ? day.toString() : ' ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : GestureDetector(
+                onTap: () => onSelectedDate(dateTime),
+                child: Center(
+                  child: Container(
+                    height: 30,
+                    width: 30,
+                    alignment: Alignment.center,
+                    child: Text(
+                      isWithinCurrentMonth ? day.toString() : ' ',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              );
   }
 }
