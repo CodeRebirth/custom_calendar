@@ -1,39 +1,46 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+Simple Calendar Flutter Package
+Simple Calendar is a Flutter package that provides an easy-to-use calendar widget for your mobile app. It allows you to display and interact with a calendar, making it simple to select dates, view months, and customize the appearance to match your app's design.
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+Simple Calendar Widget
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
+Features
+Display a calendar with selectable dates.
+Customize date selection and appearance.
+Easily navigate between months.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Installation
+To use the Simple Calendar package, add it to your pubspec.yaml file:
 
-## Features
+dependencies:
+  simple_calendar: ^1.0.0  # Use the latest version
+  
+Then, run flutter pub get to install the package.
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+Usage
+Import the package in your Dart code:
+import 'package:simple_calendar/simple_calendar.dart';
 
-## Getting started
+To use the calendar widget, simply add a CalendarApp widget to your Flutter app:
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+CalendarApp(
+  startDate: DateTime(2023, 1, 1),
+  endDate: DateTime(2023, 12, 31),
+  // Customize calendar appearance and behavior here.
+)
 
-## Usage
+Customization
+You can customize the appearance and behavior of the calendar by providing optional parameters such as selectedDecoration, todayDecoration, and more. Refer to the package documentation for a full list of customization options.
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+Callbacks
+The CalendarApp widget provides callbacks for handling date selection and navigation. You can use these callbacks to perform actions when a date is selected or when the user navigates between months.
 
-```dart
-const like = 'sample';
-```
+Documentation
+For detailed documentation and examples, visit the official documentation.
 
-## Additional information
+License
+This package is distributed under the BSD 3-Clause License. See the LICENSE file for more information.
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+Issues and Contributions
+If you encounter any issues with the package or would like to contribute, please visit the GitHub repository.
+
+We welcome your feedback and contributions to make Simple Calendar even better!

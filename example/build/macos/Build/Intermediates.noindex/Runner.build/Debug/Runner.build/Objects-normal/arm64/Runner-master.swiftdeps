@@ -1,0 +1,8 @@
+version: "Apple Swift version 5.7 (swiftlang-5.7.0.127.4 clang-1400.0.29.50)"
+options: "93962398d46dd2343b2031bf12d51e8484f0cb5d78a9721b696c8e173f5bb8a4"
+build_start_time: [1694160573, 94298839]
+build_end_time: [1694160582, 15894889]
+inputs:
+  "/Users/dev01/Desktop/custom_calender/macos/Flutter/GeneratedPluginRegistrant.swift": [1694160558, 541676044]
+  "/Users/dev01/Desktop/custom_calender/macos/Runner/AppDelegate.swift": [1694145731, 13354301]
+  "/Users/dev01/Desktop/custom_calender/macos/Runner/MainFlutterWindow.swift": [1694145731, 16242265]
