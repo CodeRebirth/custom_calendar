@@ -1,7 +1,7 @@
-Simple Calendar Flutter Package
+LightWeight Calendar Flutter Package
 Simple Calendar is a Flutter package that provides an easy-to-use calendar widget for your mobile app. It allows you to display and interact with a calendar, making it simple to select dates, view months, and customize the appearance to match your app's design.
 
-Simple Calendar Widget
+LightWeight Calendar Widget
 
 Features
 Display a calendar with selectable dates.
@@ -12,13 +12,13 @@ Installation
 To use the Simple Calendar package, add it to your pubspec.yaml file:
 
 dependencies:
-  simple_calendar: ^1.0.0  # Use the latest version
+  lightweight_calendar: ^1.0.0  # Use the latest version
   
 Then, run flutter pub get to install the package.
 
 Usage
 Import the package in your Dart code:
-import 'package:simple_calendar/simple_calendar.dart';
+import 'package:lightweight_calendar/lightweight_calendar.dart';
 
 To use the calendar widget, simply add a CalendarApp widget to your Flutter app:
 
