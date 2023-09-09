@@ -1,6 +1,7 @@
-import 'package:custom_calender/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+import 'package:custom_calender/utils.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,6 +18,9 @@ class MyApp extends StatelessWidget {
         showHeader: true,
         endDate: DateTime(2024, 1, 1),
         startDate: DateTime(2022, 1, 1),
+        headerStyle: HeaderStyle(
+          headerTitleTextStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+        ),
         enablePredicate: (date) {
           if (date.isBefore(DateTime.now())) {
             if (checkSameDay(date, DateTime.now())) {
@@ -31,6 +35,22 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class HeaderStyle {
+  TextStyle? headerTitleTextStyle;
+  Widget? leftChevron;
+  Widget? rightChevron;
+  HeaderStyle({
+    this.headerTitleTextStyle,
+    this.leftChevron,
+    this.rightChevron,
+  });
+
+  factory HeaderStyle.normal() {
+    return HeaderStyle(
+        headerTitleTextStyle: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold), leftChevron: const Icon(Icons.arrow_left), rightChevron: const Icon(Icons.arrow_right));
+  }
+}
+
 class CalendarApp extends StatefulWidget {
   final BoxDecoration? selectedDecoration;
   final BoxDecoration? todayDecoration;
@@ -38,10 +58,20 @@ class CalendarApp extends StatefulWidget {
   final bool showHeader;
   final DateTime startDate;
   final DateTime endDate;
+  final HeaderStyle? headerStyle;
 
   // Use an instance variable to set enablePredicate
-  CalendarApp({Key? key, this.selectedDecoration, this.todayDecoration, bool Function(DateTime)? enablePredicate, this.showHeader = true, required this.startDate, required this.endDate})
-      : enablePredicate = enablePredicate ?? ((date) => true), // Set a default value if not provided
+  CalendarApp(
+      {Key? key,
+      this.selectedDecoration,
+      this.todayDecoration,
+      HeaderStyle? headerStyle,
+      bool Function(DateTime)? enablePredicate,
+      this.showHeader = true,
+      required this.startDate,
+      required this.endDate})
+      : enablePredicate = enablePredicate ?? ((date) => true),
+        headerStyle = headerStyle ?? HeaderStyle.normal(), // Set a default value if not provided
         super(key: key);
 
   @override
@@ -115,15 +145,15 @@ class _CalendarAppState extends State<CalendarApp> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 IconButton(
-                  icon: const Icon(Icons.chevron_left),
+                  icon: widget.headerStyle!.leftChevron ?? HeaderStyle.normal().leftChevron!,
                   onPressed: prevMonth,
                 ),
                 Text(
                   DateFormat.yMMM().format(currentDate),
-                  style: const TextStyle(fontSize: 20),
+                  style: widget.headerStyle!.headerTitleTextStyle,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.chevron_right),
+                  icon: widget.headerStyle!.rightChevron ?? HeaderStyle.normal().rightChevron!,
                   onPressed: nextMonth,
                 ),
               ],
@@ -144,7 +174,7 @@ class _CalendarAppState extends State<CalendarApp> {
           GridView.builder(
             shrinkWrap: true,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio: 1.3,
+              childAspectRatio: 1.35,
               crossAxisCount: 7,
             ),
             itemCount: DateTime.daysPerWeek * 6,
