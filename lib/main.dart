@@ -1,7 +1,9 @@
+import 'package:custom_calender/models/disable_date_style.dart';
+import 'package:custom_calender/models/enable_date_style.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import 'package:custom_calender/utils.dart';
+import 'package:custom_calender/global_utils.dart';
+import 'models/header_style.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,22 +37,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HeaderStyle {
-  TextStyle? headerTitleTextStyle;
-  Widget? leftChevron;
-  Widget? rightChevron;
-  HeaderStyle({
-    this.headerTitleTextStyle,
-    this.leftChevron,
-    this.rightChevron,
-  });
-
-  factory HeaderStyle.normal() {
-    return HeaderStyle(
-        headerTitleTextStyle: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold), leftChevron: const Icon(Icons.arrow_left), rightChevron: const Icon(Icons.arrow_right));
-  }
-}
-
 class CalendarApp extends StatefulWidget {
   final BoxDecoration? selectedDecoration;
   final BoxDecoration? todayDecoration;
@@ -59,6 +45,8 @@ class CalendarApp extends StatefulWidget {
   final DateTime startDate;
   final DateTime endDate;
   final HeaderStyle? headerStyle;
+  final EnableDateStyle enableDateStyle;
+  final DisableDateStyle disableDateStyle;
 
   // Use an instance variable to set enablePredicate
   CalendarApp(
@@ -66,12 +54,16 @@ class CalendarApp extends StatefulWidget {
       this.selectedDecoration,
       this.todayDecoration,
       HeaderStyle? headerStyle,
+      EnableDateStyle? enableDateStyle,
+      DisableDateStyle? disableDateStyle,
       bool Function(DateTime)? enablePredicate,
       this.showHeader = true,
       required this.startDate,
       required this.endDate})
       : enablePredicate = enablePredicate ?? ((date) => true),
-        headerStyle = headerStyle ?? HeaderStyle.normal(), // Set a default value if not provided
+        headerStyle = headerStyle ?? HeaderStyle.normal(),
+        disableDateStyle = disableDateStyle ?? DisableDateStyle.defaultTextStyle(),
+        enableDateStyle = enableDateStyle ?? EnableDateStyle.defaultTextStyle(), // Set a default value if not provided
         super(key: key);
 
   @override
@@ -197,17 +189,13 @@ class _CalendarAppState extends State<CalendarApp> {
     final isDateSelectable = widget.enablePredicate!(dateTime);
 
     BoxDecoration? decoration;
-    FontWeight fontWeight;
 
     if (isSelected) {
       decoration = widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue);
-      fontWeight = FontWeight.bold;
     } else if (isToday) {
       decoration = widget.todayDecoration ?? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.blue));
-      fontWeight = FontWeight.bold;
     } else {
       decoration = const BoxDecoration(); // No decoration for unselectable dates
-      fontWeight = isDateSelectable ? FontWeight.bold : FontWeight.normal;
     }
 
     return GestureDetector(
@@ -223,10 +211,7 @@ class _CalendarAppState extends State<CalendarApp> {
           width: 30,
           decoration: decoration,
           alignment: Alignment.center,
-          child: Text(
-            isWithinCurrentMonth ? day.toString() : ' ',
-            style: TextStyle(fontWeight: fontWeight),
-          ),
+          child: Text(isWithinCurrentMonth ? day.toString() : ' ', style: isDateSelectable ? widget.enableDateStyle.enableDateTextStyle : widget.disableDateStyle.disableDateTextStyle),
         ),
       ),
     );
