@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:simple_calendar/global_utils.dart';
 import 'package:simple_calendar/simple_calendar.dart';
 
 void main() {
