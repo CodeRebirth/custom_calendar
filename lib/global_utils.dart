@@ -1,5 +1,3 @@
-library simple_calendar;
-
 bool checkSameDay(DateTime? a, DateTime? b) {
   if (a == null || b == null) {
     return false;
