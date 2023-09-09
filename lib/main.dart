@@ -15,6 +15,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: CalendarApp(
         showHeader: true,
+        endDate: DateTime(2024, 1, 1),
+        startDate: DateTime(2022, 1, 1),
         enablePredicate: (date) {
           if (date.isBefore(DateTime.now())) {
             if (checkSameDay(date, DateTime.now())) {
@@ -34,15 +36,12 @@ class CalendarApp extends StatefulWidget {
   final BoxDecoration? todayDecoration;
   final bool Function(DateTime)? enablePredicate;
   final bool showHeader;
+  final DateTime startDate;
+  final DateTime endDate;
 
   // Use an instance variable to set enablePredicate
-  CalendarApp({
-    Key? key,
-    this.selectedDecoration,
-    this.todayDecoration,
-    bool Function(DateTime)? enablePredicate,
-    this.showHeader = true,
-  })  : enablePredicate = enablePredicate ?? ((date) => true), // Set a default value if not provided
+  CalendarApp({Key? key, this.selectedDecoration, this.todayDecoration, bool Function(DateTime)? enablePredicate, this.showHeader = true, required this.startDate, required this.endDate})
+      : enablePredicate = enablePredicate ?? ((date) => true), // Set a default value if not provided
         super(key: key);
 
   @override
@@ -51,8 +50,13 @@ class CalendarApp extends StatefulWidget {
 
 class _CalendarAppState extends State<CalendarApp> {
   final List weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  DateTime currentDate = DateTime.now();
+  late DateTime currentDate;
   DateTime? selectedDate;
+  @override
+  void initState() {
+    super.initState();
+    currentDate = DateTime.now();
+  }
 
   bool isSameDay(DateTime? a, DateTime? b) {
     if (a == null || b == null) {
@@ -68,23 +72,27 @@ class _CalendarAppState extends State<CalendarApp> {
   }
 
   void nextMonth() {
-    setState(() {
-      if (currentDate.month == DateTime.december) {
-        currentDate = DateTime(currentDate.year + 1, DateTime.january);
-      } else {
-        currentDate = DateTime(currentDate.year, currentDate.month + 1);
-      }
-    });
+    if (currentDate.isBefore(widget.endDate)) {
+      setState(() {
+        if (currentDate.month == DateTime.december) {
+          currentDate = DateTime(currentDate.year + 1, DateTime.january);
+        } else {
+          currentDate = DateTime(currentDate.year, currentDate.month + 1);
+        }
+      });
+    }
   }
 
   void prevMonth() {
-    setState(() {
-      if (currentDate.month == DateTime.january) {
-        currentDate = DateTime(currentDate.year - 1, DateTime.december);
-      } else {
-        currentDate = DateTime(currentDate.year, currentDate.month - 1);
-      }
-    });
+    if (currentDate.isAfter(widget.startDate)) {
+      setState(() {
+        if (currentDate.month == DateTime.january) {
+          currentDate = DateTime(currentDate.year - 1, DateTime.december);
+        } else {
+          currentDate = DateTime(currentDate.year, currentDate.month - 1);
+        }
+      });
+    }
   }
 
   int daysInMonth(DateTime date) {
@@ -141,7 +149,7 @@ class _CalendarAppState extends State<CalendarApp> {
             ),
             itemCount: DateTime.daysPerWeek * 6,
             itemBuilder: (context, index) {
-              final day = index + 1 - currentDate.weekday;
+              final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
               final dateTime = DateTime(currentDate.year, currentDate.month, day);
               return buildDayContainer(dateTime);
             },
@@ -156,10 +164,25 @@ class _CalendarAppState extends State<CalendarApp> {
     final isToday = isSameDay(dateTime, DateTime.now());
     final isSelected = isSameDay(selectedDate, dateTime);
     final isWithinCurrentMonth = dateTime.month == currentDate.month;
+    final isDateSelectable = widget.enablePredicate!(dateTime);
+
+    BoxDecoration? decoration;
+    FontWeight fontWeight;
+
+    if (isSelected) {
+      decoration = widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue);
+      fontWeight = FontWeight.bold;
+    } else if (isToday) {
+      decoration = widget.todayDecoration ?? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.blue));
+      fontWeight = FontWeight.bold;
+    } else {
+      decoration = const BoxDecoration(); // No decoration for unselectable dates
+      fontWeight = isDateSelectable ? FontWeight.bold : FontWeight.normal;
+    }
 
     return GestureDetector(
       onTap: () {
-        if (widget.enablePredicate!(dateTime) == false) {
+        if (!isDateSelectable) {
           return;
         }
         onSelectedDate(dateTime);
@@ -168,17 +191,11 @@ class _CalendarAppState extends State<CalendarApp> {
         child: Container(
           height: 30,
           width: 30,
-          decoration: isSelected
-              ? widget.selectedDecoration ?? const BoxDecoration(shape: BoxShape.circle, color: Colors.blue)
-              : isToday
-                  ? widget.todayDecoration ?? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.blue))
-                  : const BoxDecoration(), // No decoration for unselectable dates
+          decoration: decoration,
           alignment: Alignment.center,
           child: Text(
             isWithinCurrentMonth ? day.toString() : ' ',
-            style: TextStyle(
-              fontWeight: widget.enablePredicate!(dateTime) == false ? FontWeight.normal : FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: fontWeight),
           ),
         ),
       ),
