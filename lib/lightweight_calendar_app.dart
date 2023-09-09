@@ -92,59 +92,54 @@ class _CalendarAppState extends State<CalendarApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Simple Fast Calender'),
-      ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          if (widget.showHeader)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                IconButton(
-                  icon: widget.headerStyle!.leftChevron ?? HeaderStyle.normal().leftChevron!,
-                  onPressed: prevMonth,
-                ),
-                Text(
-                  DateFormat.yMMM().format(currentDate),
-                  style: widget.headerStyle!.headerTitleTextStyle,
-                ),
-                IconButton(
-                  icon: widget.headerStyle!.rightChevron ?? HeaderStyle.normal().rightChevron!,
-                  onPressed: nextMonth,
-                ),
-              ],
-            ),
-          GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 2),
-            itemCount: 7,
-            itemBuilder: (context, index) {
-              return Center(
-                child: Text(
-                  StringConst.instance.weekdays[index],
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              );
-            },
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        if (widget.showHeader)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              IconButton(
+                icon: widget.headerStyle!.leftChevron ?? HeaderStyle.normal().leftChevron!,
+                onPressed: prevMonth,
+              ),
+              Text(
+                DateFormat.yMMM().format(currentDate),
+                style: widget.headerStyle!.headerTitleTextStyle,
+              ),
+              IconButton(
+                icon: widget.headerStyle!.rightChevron ?? HeaderStyle.normal().rightChevron!,
+                onPressed: nextMonth,
+              ),
+            ],
           ),
-          GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              childAspectRatio: 1.35,
-              crossAxisCount: 7,
-            ),
-            itemCount: DateTime.daysPerWeek * 6,
-            itemBuilder: (context, index) {
-              final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
-              final dateTime = DateTime(currentDate.year, currentDate.month, day);
-              return buildDayContainer(dateTime);
-            },
-          )
-        ],
-      ),
+        GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 2),
+          itemCount: 7,
+          itemBuilder: (context, index) {
+            return Center(
+              child: Text(
+                StringConst.instance.weekdays[index],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            );
+          },
+        ),
+        GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            childAspectRatio: 1.35,
+            crossAxisCount: 7,
+          ),
+          itemCount: DateTime.daysPerWeek * 6,
+          itemBuilder: (context, index) {
+            final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
+            final dateTime = DateTime(currentDate.year, currentDate.month, day);
+            return buildDayContainer(dateTime);
+          },
+        )
+      ],
     );
   }
 
