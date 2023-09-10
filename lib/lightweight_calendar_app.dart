@@ -6,6 +6,7 @@ import 'models/enable_date_style.dart';
 import 'models/header_style.dart';
 
 class CalendarApp extends StatefulWidget {
+  final Function? onSelectedDate;
   final BoxDecoration? selectedDecoration;
   final BoxDecoration? todayDecoration;
   final bool Function(DateTime)? enablePredicate;
@@ -15,16 +16,19 @@ class CalendarApp extends StatefulWidget {
   final HeaderStyle? headerStyle;
   final EnableDateStyle enableDateStyle;
   final DisableDateStyle disableDateStyle;
+  final bool swipeAnimationEnable;
 
   // Use an instance variable to set enablePredicate
   CalendarApp(
       {Key? key,
+      this.onSelectedDate,
       this.selectedDecoration,
       this.todayDecoration,
       HeaderStyle? headerStyle,
       EnableDateStyle? enableDateStyle,
       DisableDateStyle? disableDateStyle,
       bool Function(DateTime)? enablePredicate,
+      this.swipeAnimationEnable = false,
       this.showHeader = true,
       required this.startDate,
       required this.endDate})
@@ -41,6 +45,44 @@ class CalendarApp extends StatefulWidget {
 class _CalendarAppState extends State<CalendarApp> {
   late DateTime currentDate;
   DateTime? selectedDate;
+  Offset? swipeStart;
+  final double swipeThreshold = 50.0;
+  double xOffset = 0.0; // Add this for animation
+
+  void onSelectedDateCallback(date) {
+    widget.onSelectedDate!(date);
+  }
+
+  void handleSwipeStart(DragStartDetails details) {
+    swipeStart = details.localPosition;
+  }
+
+  void handleSwipeEnd(DragEndDetails details) {
+    if (swipeStart != null) {
+      final dx = details.velocity.pixelsPerSecond.dx;
+
+      if (dx > swipeThreshold) {
+        // Swiped right
+        prevMonth();
+      } else if (dx < -swipeThreshold) {
+        // Swiped left
+        nextMonth();
+      }
+
+      swipeStart = null;
+    }
+  }
+
+  void handleSwipe(DragUpdateDetails details) {
+    if (details.primaryDelta! > 0) {
+      // Swiped right
+      prevMonth();
+    } else if (details.primaryDelta! < 0) {
+      // Swiped left
+      nextMonth();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +110,15 @@ class _CalendarAppState extends State<CalendarApp> {
         } else {
           currentDate = DateTime(currentDate.year, currentDate.month + 1);
         }
+
+        xOffset = -MediaQuery.of(context).size.width; // Slide to the left
+      });
+
+      // After the animation, reset the xOffset
+      Future.delayed(Duration(milliseconds: 300), () {
+        setState(() {
+          xOffset = 0.0;
+        });
       });
     }
   }
@@ -80,6 +131,15 @@ class _CalendarAppState extends State<CalendarApp> {
         } else {
           currentDate = DateTime(currentDate.year, currentDate.month - 1);
         }
+
+        xOffset = MediaQuery.of(context).size.width; // Slide to the right
+      });
+
+      // After the animation, reset the xOffset
+      Future.delayed(Duration(milliseconds: 300), () {
+        setState(() {
+          xOffset = 0.0;
+        });
       });
     }
   }
@@ -92,54 +152,69 @@ class _CalendarAppState extends State<CalendarApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        if (widget.showHeader)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                icon: widget.headerStyle!.leftChevron ?? HeaderStyle.normal().leftChevron!,
-                onPressed: prevMonth,
+    return GestureDetector(
+      onHorizontalDragStart: (details) {
+        handleSwipeStart(details);
+      },
+      onHorizontalDragEnd: (details) {
+        handleSwipeEnd(details);
+      },
+      child: AnimatedContainer(
+        duration: widget.swipeAnimationEnable == true ? Duration(milliseconds: 300) : Duration(milliseconds: 0), // Adjust the duration as needed
+        transform: widget.swipeAnimationEnable == true ? Matrix4.translationValues(xOffset, 0.0, 0.0) : null,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            if (widget.showHeader)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  IconButton(
+                    icon: widget.headerStyle!.leftChevron ?? HeaderStyle.normal().leftChevron!,
+                    onPressed: prevMonth,
+                  ),
+                  Text(
+                    DateFormat.yMMM().format(currentDate),
+                    style: widget.headerStyle!.headerTitleTextStyle,
+                  ),
+                  IconButton(
+                    icon: widget.headerStyle!.rightChevron ?? HeaderStyle.normal().rightChevron!,
+                    onPressed: nextMonth,
+                  ),
+                ],
               ),
-              Text(
-                DateFormat.yMMM().format(currentDate),
-                style: widget.headerStyle!.headerTitleTextStyle,
+            GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 2),
+              itemCount: 7,
+              itemBuilder: (context, index) {
+                return Center(
+                  child: Text(
+                    StringConst.instance.weekdays[index],
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                );
+              },
+            ),
+            InkWell(
+              child: GridView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  childAspectRatio: 1.35,
+                  crossAxisCount: 7,
+                ),
+                itemCount: DateTime.daysPerWeek * 6,
+                itemBuilder: (context, index) {
+                  final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
+                  final dateTime = DateTime(currentDate.year, currentDate.month, day);
+                  return buildDayContainer(dateTime);
+                },
               ),
-              IconButton(
-                icon: widget.headerStyle!.rightChevron ?? HeaderStyle.normal().rightChevron!,
-                onPressed: nextMonth,
-              ),
-            ],
-          ),
-        GridView.builder(
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 2),
-          itemCount: 7,
-          itemBuilder: (context, index) {
-            return Center(
-              child: Text(
-                StringConst.instance.weekdays[index],
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            );
-          },
+            )
+          ],
         ),
-        GridView.builder(
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            childAspectRatio: 1.35,
-            crossAxisCount: 7,
-          ),
-          itemCount: DateTime.daysPerWeek * 6,
-          itemBuilder: (context, index) {
-            final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
-            final dateTime = DateTime(currentDate.year, currentDate.month, day);
-            return buildDayContainer(dateTime);
-          },
-        )
-      ],
+      ),
     );
   }
 
