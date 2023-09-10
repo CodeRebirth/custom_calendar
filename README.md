@@ -14,7 +14,7 @@ To use the Lightweight Calendar package, add it to your pubspec.yaml file:
 
 ```yaml
 dependencies:
-  lightweight_calendar: ^1.0.3
+  lightweight_calendar: ^1.0.4
 ```
 
 ### Basic setup

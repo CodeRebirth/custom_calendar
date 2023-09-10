@@ -1,3 +1,3 @@
-## 1.0.3
+## 1.0.4
 
 * Added swipe gesture month change 

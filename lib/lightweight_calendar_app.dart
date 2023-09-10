@@ -6,10 +6,10 @@ import 'models/enable_date_style.dart';
 import 'models/header_style.dart';
 
 class CalendarApp extends StatefulWidget {
-  final Function? onSelectedDate;
   final BoxDecoration? selectedDecoration;
   final BoxDecoration? todayDecoration;
   final bool Function(DateTime)? enablePredicate;
+  final Function(DateTime)? onSelectedDate;
   final bool showHeader;
   final DateTime startDate;
   final DateTime endDate;
@@ -49,7 +49,7 @@ class _CalendarAppState extends State<CalendarApp> {
   final double swipeThreshold = 50.0;
   double xOffset = 0.0; // Add this for animation
 
-  void onSelectedDateCallback(date) {
+  void onSelectedDateCallback(DateTime date) {
     widget.onSelectedDate!(date);
   }
 
@@ -97,6 +97,7 @@ class _CalendarAppState extends State<CalendarApp> {
   }
 
   void onSelectedDate(DateTime date) {
+    onSelectedDateCallback(date);
     setState(() {
       selectedDate = date;
     });
