@@ -2,8 +2,6 @@
 
 Lightweight Calendar is a Flutter package that provides an easy-to-use calendar widget for your mobile app. It allows you to display and interact with a calendar, making it simple to select dates, view months, and customize the appearance to match your app's design.
 
-LightWeight Calendar Widget
-
 ## Features
 
 * Display a calendar with selectable dates.
@@ -16,7 +14,7 @@ To use the Lightweight Calendar package, add it to your pubspec.yaml file:
 
 ```yaml
 dependencies:
-  lightweight_calendar: ^1.0.0
+  lightweight_calendar: ^1.0.3
 ```
 
 ### Basic setup
