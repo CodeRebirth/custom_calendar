@@ -14,10 +14,8 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: CalendarApp(
+            onSelectedDate: (date) {},
             startDate: DateTime(2022, 1, 1),
-            onSelectedDate: (date) {
-              print(date);
-            },
             endDate: DateTime(2024, 1, 1),
             enablePredicate: (date) {
               if (date.isAfter(DateTime.now())) {

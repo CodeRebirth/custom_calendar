@@ -153,6 +153,8 @@ class _CalendarAppState extends State<CalendarApp> {
 
   @override
   Widget build(BuildContext context) {
+    final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
     return GestureDetector(
       onHorizontalDragStart: (details) {
         handleSwipeStart(details);
@@ -161,11 +163,10 @@ class _CalendarAppState extends State<CalendarApp> {
         handleSwipeEnd(details);
       },
       child: AnimatedContainer(
-        duration: widget.swipeAnimationEnable == true ? Duration(milliseconds: 300) : Duration(milliseconds: 0), // Adjust the duration as needed
+        duration: widget.swipeAnimationEnable == true ? Duration(milliseconds: 300) : Duration(milliseconds: 0),
         transform: widget.swipeAnimationEnable == true ? Matrix4.translationValues(xOffset, 0.0, 0.0) : null,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+        child: Center(
+          child: ListView(shrinkWrap: true, physics: isLandscape ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(), children: [
             if (widget.showHeader)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -186,7 +187,10 @@ class _CalendarAppState extends State<CalendarApp> {
               ),
             GridView.builder(
               shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7, childAspectRatio: 2),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isLandscape ? 7 : 7, // Always set crossAxisCount to 7
+                childAspectRatio: isLandscape ? 2 : 2.0,
+              ),
               itemCount: 7,
               itemBuilder: (context, index) {
                 return Center(
@@ -197,23 +201,21 @@ class _CalendarAppState extends State<CalendarApp> {
                 );
               },
             ),
-            InkWell(
-              child: GridView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  childAspectRatio: 1.35,
-                  crossAxisCount: 7,
-                ),
-                itemCount: DateTime.daysPerWeek * 6,
-                itemBuilder: (context, index) {
-                  final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
-                  final dateTime = DateTime(currentDate.year, currentDate.month, day);
-                  return buildDayContainer(dateTime);
-                },
+            GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 7, // Always set crossAxisCount to 7
+                childAspectRatio: isLandscape ? 2 : 1.35, // Adjust child aspect ratio in landscape
               ),
-            )
-          ],
+              itemCount: 7 * 6,
+              itemBuilder: (context, index) {
+                final day = index + 1 - DateTime(currentDate.year, currentDate.month, 1).weekday;
+                final dateTime = DateTime(currentDate.year, currentDate.month, day);
+                return buildDayContainer(dateTime);
+              },
+            ),
+          ]),
         ),
       ),
     );
