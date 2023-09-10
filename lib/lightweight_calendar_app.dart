@@ -47,7 +47,7 @@ class _CalendarAppState extends State<CalendarApp> {
   DateTime? selectedDate;
   Offset? swipeStart;
   final double swipeThreshold = 50.0;
-  double xOffset = 0.0; // Add this for animation
+  double xOffset = 0.0; // for swipe animation purposes
 
   void onSelectedDateCallback(DateTime date) {
     widget.onSelectedDate!(date);
